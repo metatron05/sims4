@@ -2,9 +2,9 @@
 import argparse
 import time
 import os
-import sys
-import random
 import collections
+import pandas as pd
+import json
 
 # External modules from Anaconda distribution
 import numpy as np
@@ -16,8 +16,8 @@ except:
     print("Warning: no real-time keyboard/hotkey support.")
 
 p = argparse.ArgumentParser(description="City simulation in Python.")
-p.add_argument("-m", dest="m", type=int, default=20, help="Width of surface (default 20)")
-p.add_argument("-n", dest="n", type=int, default=20, help="Height of surface (default 20)")
+p.add_argument("-m", dest="m", type=int, default=30, help="Width of surface (default 30)")
+p.add_argument("-n", dest="n", type=int, default=30, help="Height of surface (default 30)")
 p.add_argument("-t", dest="t", type=int, default=5, help="Update interval (s) (default 5s)")
 args = p.parse_args()
 
@@ -42,35 +42,35 @@ class Business(Field):
     def __init__(self):
         Field.__init__(self, "🏭")
 
+class Street(Field):
+    def __init__(self):
+        Field.__init__(self, "██")
+
 class Surface:
     def __init__(self, m, n):
         self.surface = np.full((m, n), Land())
         self.m = m
         self.n = n
 
-        for i in range(random.randrange(m + n)):
-            self.surface[random.randrange(m), random.randrange(n)] = random.choice((Water(), Resident(), Business()))
+        self.df = pd.read_csv("map.csv", sep=";")
+        self.df = self.repair_map(self.df)
+
+    def repair_map(self, map):
+        map = map.replace(["w"], Water())
+        map = map.replace(["s"], Street())
+        map = map.replace(["h"], Resident())
+        map = map.replace(["f"], Business())
+        map = map.replace([np.nan], Land())
+        return map
 
     def draw(self):
-        for row in range(self.n):
-            for col in range(self.m):
-                print(self.surface[col, row].char, end="")
+        for index, row in self.df.iterrows():
+            for column in row:
+                print(column.char, end="")
             print()
 
     def evolve(self):
-        changes = []
-
-        for row in range(self.n):
-            for col in range(self.m):
-                field = self.surface[col, row]
-                if isinstance(field, Resident):
-                    field.value += 1
-                    if field.value >= random.randint(5, 10):
-                        field = Water()
-                        changes.append(f"Residents at {row},{col} drowned.")
-                self.surface[col, row] = field
-
-        return changes
+        pass
 
 class Game:
     def __init__(self):
@@ -87,17 +87,7 @@ class Game:
         while not loopstop:
             time.sleep(args.t)
             os.system("cls") # Bei Windows sollte hier "cls" stehen
-            print(f"Sim round #{int(time.time())} - Symbols: ・land 〜water 〠res.house 〓business")
-
-            changes = self.surface.evolve()
-            self.surface.draw()
-
-            for change in changes:
-                stampedchange = f"#{int(time.time())} {change}"
-                self.logs.append(stampedchange)
-                print(stampedchange, file=f)
-            for log in self.logs:
-                print(f"» {log}")
+            self.surface.draw()  
 
 g = Game()
 g.play()
