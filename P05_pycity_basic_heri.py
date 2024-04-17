@@ -21,11 +21,13 @@ p.add_argument("-n", dest="n", type=int, default=30, help="Height of surface (de
 p.add_argument("-t", dest="t", type=int, default=5, help="Update interval (s) (default 5s)")
 args = p.parse_args()
 
+#Parent class
 class Field:
     def __init__(self, char):
         self.char = char
         self.value = 0
 
+#Subclasses
 class Land(Field):
     def __init__(self):
         Field.__init__(self, "..")
@@ -46,12 +48,14 @@ class Street(Field):
     def __init__(self):
         Field.__init__(self, "██")
 
+#Map
 class Surface:
     def __init__(self, m, n):
         self.surface = np.full((m, n), Land())
         self.m = m
         self.n = n
 
+        #load and replace Map (Dataframe) with classes
         self.df = pd.read_csv("map.csv", sep=";")
         self.df = self.repair_map(self.df)
 
@@ -64,14 +68,17 @@ class Surface:
         return map
 
     def draw(self):
-        for index, row in self.df.iterrows():
+        #draw Map
+        for row in self.df.iterrows():
             for column in row:
+                #Print Class Characters (Variable char)
                 print(column.char, end="")
             print()
 
     def evolve(self):
         pass
 
+#Gameloop
 class Game:
     def __init__(self):
         self.surface = Surface(args.m, args.n)
