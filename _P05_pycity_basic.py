@@ -19,7 +19,7 @@ except:
 p = argparse.ArgumentParser(description="City simulation in Python.")
 p.add_argument("-m", dest="m", type=int, default=30, help="Width of surface (default 30)")
 p.add_argument("-n", dest="n", type=int, default=30, help="Height of surface (default 30)")
-p.add_argument("-t", dest="t", type=int, default=1, help="Update interval (s) (default 1s)")
+p.add_argument("-t", dest="t", type=int, default=0.5, help="Update interval (s) (default 0.5s)")
 args = p.parse_args()
 
 #Parent class
@@ -31,7 +31,7 @@ class Field:
 #Subclasses
 class Land(Field):
     def __init__(self):
-        Field.__init__(self, "..")
+        Field.__init__(self, "🌵")
 
 class Water(Field):
     def __init__(self):
@@ -47,7 +47,7 @@ class Business(Field):
 
 class Street(Field):
     def __init__(self):
-        Field.__init__(self, "██")
+        Field.__init__(self, "➕")
 
 class Car(Field):
     def __init__(self):
